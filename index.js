@@ -91,29 +91,17 @@ async function startDiscord() {
   });
 
   discord.on("messageCreate", async (msg) => {
-    // ✅ LOG de tudo que chega (pra você ver no terminal)
-    console.log("RECEBI:", {
-      channelId: msg.channel?.id,
-      parentId: msg.channel?.parentId,
-      isThread: typeof msg.channel?.isThread === "function" ? msg.channel.isThread() : false,
-      authorBot: msg.author?.bot,
-      hasContent: !!msg.content,
-      embeds: msg.embeds?.length || 0,
-      attachments: msg.attachments?.size || 0,
-    });
+    // só o canal certo
+    if (msg.channelId !== CHANNEL_ID) return;
 
-    if (msg.author?.bot) return;
+    // evita loop: ignora mensagens do PRÓPRIO bot
+    if (msg.author?.id === discord.user?.id) return;
 
-    // ✅ Aceita mensagem no canal OU em thread desse canal
-    const isSameChannel = msg.channel?.id === CHANNEL_ID;
-    const isThreadOfChannel =
-      typeof msg.channel?.isThread === "function" &&
-      msg.channel.isThread() &&
-      msg.channel.parentId === CHANNEL_ID;
+    // ✅ permite mensagens de webhook (rss), mas ignora outros bots “normais”
+    // (webhookId existe quando a mensagem veio de webhook)
+    if (msg.author?.bot && !msg.webhookId) return;
 
-    if (!isSameChannel && !isThreadOfChannel) return;
-
-    const text = buildTextFromDiscordMessage(msg);
+    const text = (msg.content || "").trim();
     if (!text) return;
 
     if (!waSock) {
