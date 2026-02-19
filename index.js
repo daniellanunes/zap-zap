@@ -90,9 +90,17 @@ async function startDiscord() {
     console.log("Sending to WHATSAPP_GROUP_ID:", WHATSAPP_GROUP_ID);
   });
 
-discord.on("messageCreate", async (msg) => {
-  console.log("RECEBI QUALQUER MENSAGEM ✅", msg.channel.id);
-});
+  discord.on("messageCreate", async (msg) => {
+    // ✅ LOG de tudo que chega (pra você ver no terminal)
+    console.log("RECEBI:", {
+      channelId: msg.channel?.id,
+      parentId: msg.channel?.parentId,
+      isThread: typeof msg.channel?.isThread === "function" ? msg.channel.isThread() : false,
+      authorBot: msg.author?.bot,
+      hasContent: !!msg.content,
+      embeds: msg.embeds?.length || 0,
+      attachments: msg.attachments?.size || 0,
+    });
 
     if (msg.author?.bot) return;
 
